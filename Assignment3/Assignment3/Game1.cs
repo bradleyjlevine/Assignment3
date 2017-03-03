@@ -1,19 +1,31 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 
 namespace Assignment3
 {
     /// <summary>
-    /// This is the main type for your game.
+    /// This is the main type for your game
     /// </summary>
-    public class Game1 : Game
+    public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        BasicEffect effect;
+
         VertexBuffer vertexBuffer;
         IndexBuffer indexBuffer;
+
+        BasicEffect basicEffect;
+        Matrix world = Matrix.CreateTranslation(0, 0, 0);
+        Matrix view = Matrix.CreateLookAt(new Vector3(0, 0, 3), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+        Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 800f / 480f, 0.01f, 100f);
+        double angle = 0;
 
         public Game1()
         {
@@ -29,28 +41,6 @@ namespace Assignment3
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
-            VertexPositionColor[] vertices = new VertexPositionColor[8];
-
-            vertices[0] = new VertexPositionColor(new Vector3(50, 50, 0), Color.White);
-            vertices[1] = new VertexPositionColor(new Vector3(60, 50, 0), Color.White);
-            vertices[2] = new VertexPositionColor(new Vector3(50, 60, 0), Color.White);
-            vertices[3] = new VertexPositionColor(new Vector3(60, 60, 0), Color.White);
-
-            vertices[4] = new VertexPositionColor(new Vector3(50, 50, 10), Color.White);
-            vertices[5] = new VertexPositionColor(new Vector3(60, 50, 10), Color.White);
-            vertices[6] = new VertexPositionColor(new Vector3(50, 60, 10), Color.White);
-            vertices[7] = new VertexPositionColor(new Vector3(60, 60, 10), Color.White);
-
-            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 8, BufferUsage.WriteOnly);
-            vertexBuffer.SetData<VertexPositionColor>(vertices);
-
-            short[] indices = new short[36];
-            indices[0] = 0; indices[1] = 1; indices[2] = 2;
-            indices[3] = 2; indices[4] = 1; indices[5] = 3;
-
-
             base.Initialize();
         }
 
@@ -63,17 +53,49 @@ namespace Assignment3
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            basicEffect = new BasicEffect(GraphicsDevice);
+
+            // A temporary array, with 12 items in it, because
+            // the icosahedron has 12 distinct vertices
+            VertexPositionColor[] vertices = new VertexPositionColor[8];
+
+            vertices[0] = new VertexPositionColor(new Vector3(0f, 0f, 0), Color.White);
+            vertices[1] = new VertexPositionColor(new Vector3(2f, 0f, 0), Color.Red);
+            vertices[2] = new VertexPositionColor(new Vector3(0f, 2f, 0), Color.Green);
+            vertices[3] = new VertexPositionColor(new Vector3(2f, 2f, 0), Color.White);
+
+            vertices[4] = new VertexPositionColor(new Vector3(0f, 0f, 2f), Color.Black);
+            vertices[5] = new VertexPositionColor(new Vector3(2f, 0f, 2f), Color.Yellow);
+            vertices[6] = new VertexPositionColor(new Vector3(0f, 2f, 2f), Color.Blue);
+            vertices[7] = new VertexPositionColor(new Vector3(2f, 2f, 2f), Color.Black);
+
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 8, BufferUsage.WriteOnly);
+            vertexBuffer.SetData<VertexPositionColor>(vertices);
+
+            short[] indices = new short[36];
+            indices[0] = 0; indices[1] = 1; indices[2] = 2;
+            indices[3] = 2; indices[4] = 1; indices[5] = 3;
+            indices[6] = 4; indices[7] = 5; indices[8] = 6;
+            indices[9] = 6; indices[10] = 5; indices[11] = 7;
+            indices[12] = 1; indices[13] = 5; indices[14] = 3;
+            indices[15] = 3; indices[16] = 5; indices[17] = 7;
+            indices[18] = 4; indices[19] = 0; indices[20] = 6;
+            indices[21] = 6; indices[22] = 0; indices[23] = 2;
+            indices[24] = 4; indices[25] = 5; indices[26] = 0;
+            indices[27] = 0; indices[28] = 5; indices[29] = 1;
+            indices[30] = 6; indices[31] = 7; indices[32] = 2;
+            indices[33] = 2; indices[34] = 7; indices[35] = 3;
+
+            indexBuffer = new IndexBuffer(GraphicsDevice, typeof(short), indices.Length, BufferUsage.WriteOnly);
+            indexBuffer.SetData(indices);
         }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
-        /// game-specific content.
+        /// all content.
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
-            Content.Unload();
         }
 
         /// <summary>
@@ -83,37 +105,17 @@ namespace Assignment3
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            // Allows the game to exit
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+                this.Exit();
 
-            // TODO: Add your update logic here
+            angle += 0.01f;
+            view = Matrix.CreateLookAt(
+                new Vector3(5 * (float)Math.Sin(angle), -2, 5 * (float)Math.Cos(angle)),
+                new Vector3(0, 0, 0),
+                Vector3.UnitY);
 
             base.Update(gameTime);
-        }
-
-        private void DrawCube()
-        {
-            var cameraPos = new Vector3(25, 25, -10);
-            var cameraLookAtVector = Vector3.Zero;
-            var cameraUpVector = Vector3.UnitZ;
-
-            effect.View = Matrix.CreateLookAt(cameraPos, cameraLookAtVector, cameraUpVector);
-
-            float aspectRatio = graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight;
-
-            float fieldOfVeiw = MathHelper.PiOver4;
-
-            float nearClipPlane = 1f;
-            float farClipPlane = 100f;
-
-            effect.Projection = Matrix.CreatePerspectiveFieldOfView(fieldOfVeiw, aspectRatio, nearClipPlane, farClipPlane);
-
-            foreach(var pass in effect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-
-                graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList ,vertexBuffer, 0, 12);
-            }
         }
 
         /// <summary>
@@ -124,9 +126,23 @@ namespace Assignment3
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            basicEffect.World = world;
+            basicEffect.View = view;
+            basicEffect.Projection = projection;
+            basicEffect.VertexColorEnabled = true;
 
-            DrawCube();
+            GraphicsDevice.SetVertexBuffer(vertexBuffer);
+            GraphicsDevice.Indices = indexBuffer;
+
+            RasterizerState rasterizerState = new RasterizerState();
+            rasterizerState.CullMode = CullMode.None;
+            GraphicsDevice.RasterizerState = rasterizerState;
+
+            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, 8, 0, 12);
+            }
 
             base.Draw(gameTime);
         }
