@@ -12,8 +12,8 @@ namespace Assignment3
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         BasicEffect effect;
-        VertexPositionTexture[] vertexBuffer;
-        VertexPositionTexture[] bigBox;
+        VertexBuffer vertexBuffer;
+        IndexBuffer indexBuffer;
 
         public Game1()
         {
@@ -31,49 +31,24 @@ namespace Assignment3
         {
             // TODO: Add your initialization logic here
 
-            vertexBuffer = new VertexPositionTexture[8];
-            bigBox = new VertexPositionTexture[8];
+            VertexPositionColor[] vertices = new VertexPositionColor[8];
 
-            //front
-            vertexBuffer[0].Position = new Vector3(50, 50, 0);  //v0
-            vertexBuffer[1].Position = new Vector3(60, 50, 0);  //v1
-            vertexBuffer[2].Position = new Vector3(50, 60, 0);  //v2
+            vertices[0] = new VertexPositionColor(new Vector3(50, 50, 0), Color.White);
+            vertices[1] = new VertexPositionColor(new Vector3(60, 50, 0), Color.White);
+            vertices[2] = new VertexPositionColor(new Vector3(50, 60, 0), Color.White);
+            vertices[3] = new VertexPositionColor(new Vector3(60, 60, 0), Color.White);
 
-            vertexBuffer[3].Position = vertexBuffer[1].Position;
-            vertexBuffer[4].Position = new Vector3(60, 60, 0);  //v3
-            vertexBuffer[5].Position = vertexBuffer[2].Position;
+            vertices[4] = new VertexPositionColor(new Vector3(50, 50, 10), Color.White);
+            vertices[5] = new VertexPositionColor(new Vector3(60, 50, 10), Color.White);
+            vertices[6] = new VertexPositionColor(new Vector3(50, 60, 10), Color.White);
+            vertices[7] = new VertexPositionColor(new Vector3(60, 60, 10), Color.White);
 
-            //back
-            vertexBuffer[6].Position = new Vector3(60, 50, 10); //v5
-            vertexBuffer[7].Position = new Vector3(50, 50, 10); //v4
-            vertexBuffer[8].Position = new Vector3(50, 60, 10); //v6
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 8, BufferUsage.WriteOnly);
+            vertexBuffer.SetData<VertexPositionColor>(vertices);
 
-            vertexBuffer[9].Position = vertexBuffer[6].Position;
-            vertexBuffer[10].Position = vertexBuffer[8].Position;
-            vertexBuffer[11].Position = new Vector3(60, 60, 10);//v7
-            
-            //right
-            vertexBuffer[12].Position = vertexBuffer[1].Position;
-            vertexBuffer[13].Position = vertexBuffer[6].Position;
-            vertexBuffer[14].Position = vertexBuffer[4].Position;
-
-            vertexBuffer[15].Position = vertexBuffer[6].Position;
-            vertexBuffer[16].Position = vertexBuffer[11].Position;
-            vertexBuffer[17].Position = vertexBuffer[4].Position;
-
-            //left
-            vertexBuffer[18].Position = vertexBuffer[7].Position;
-            vertexBuffer[19].Position = vertexBuffer[0].Position;
-            vertexBuffer[20].Position = vertexBuffer[8].Position;
-
-            vertexBuffer[21].Position = vertexBuffer[0].Position;
-            vertexBuffer[22].Position = vertexBuffer[2].Position;
-            vertexBuffer[23].Position = vertexBuffer[8].Position;
-
-            //top
-
-
-
+            short[] indices = new short[36];
+            indices[0] = 0; indices[1] = 1; indices[2] = 2;
+            indices[3] = 2; indices[4] = 1; indices[5] = 3;
 
 
             base.Initialize();
@@ -137,8 +112,7 @@ namespace Assignment3
             {
                 pass.Apply();
 
-                graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList ,vertexBuffer, 0, 1);
-                graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, vertexBuffer, 1, 1);
+                graphics.GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList ,vertexBuffer, 0, 12);
             }
         }
 
@@ -151,6 +125,8 @@ namespace Assignment3
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
+            DrawCube();
 
             base.Draw(gameTime);
         }
