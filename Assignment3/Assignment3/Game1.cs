@@ -17,6 +17,7 @@ namespace Assignment3
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D opm;
 
         VertexBuffer vertexBuffer;
         IndexBuffer indexBuffer;
@@ -50,6 +51,7 @@ namespace Assignment3
         /// </summary>
         protected override void LoadContent()
         {
+            Content.Load<Texture2D>("one.jpg");
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -96,6 +98,7 @@ namespace Assignment3
         /// </summary>
         protected override void UnloadContent()
         {
+            Content.Unload();
         }
 
         /// <summary>
