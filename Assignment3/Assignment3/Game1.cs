@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -24,8 +25,8 @@ namespace Assignment3
 
         BasicEffect basicEffect;
         Matrix world = Matrix.CreateTranslation(0, 0, 0);
-        Matrix view = Matrix.CreateLookAt(new Vector3(0, 0, 3), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
-        Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 800f / 480f, 0.01f, 100f);
+        Matrix view = Matrix.CreateLookAt(new Vector3(0, 0, 50), new Vector3(0, 0, 0), new Vector3(0, 1, 0));
+        Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 800f / 480f, 0.01f, 1000f);
         double angle = 0;
 
         public Game1()
@@ -51,7 +52,7 @@ namespace Assignment3
         /// </summary>
         protected override void LoadContent()
         {
-            Content.Load<Texture2D>("one.jpg");
+            opm = Texture2D.FromStream(GraphicsDevice, new FileStream("one.jpg", FileMode.Open));
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -59,20 +60,20 @@ namespace Assignment3
 
             // A temporary array, with 12 items in it, because
             // the icosahedron has 12 distinct vertices
-            VertexPositionColor[] vertices = new VertexPositionColor[8];
+            VertexPositionTexture[] vertices = new VertexPositionTexture[8];
 
-            vertices[0] = new VertexPositionColor(new Vector3(0f, 0f, 0), Color.White);
-            vertices[1] = new VertexPositionColor(new Vector3(2f, 0f, 0), Color.Red);
-            vertices[2] = new VertexPositionColor(new Vector3(0f, 2f, 0), Color.Green);
-            vertices[3] = new VertexPositionColor(new Vector3(2f, 2f, 0), Color.White);
+            vertices[0] = new VertexPositionTexture(new Vector3(-5f, -5f, 5f), new Vector2(1, 1));
+            vertices[1] = new VertexPositionTexture(new Vector3(5f, -5f, 5f), new Vector2(0, 1));
+            vertices[2] = new VertexPositionTexture(new Vector3(-5f, 5f, 5f), new Vector2(1, 0));
+            vertices[3] = new VertexPositionTexture(new Vector3(5f, 5f, 5f), new Vector2(0, 0));
 
-            vertices[4] = new VertexPositionColor(new Vector3(0f, 0f, 2f), Color.Black);
-            vertices[5] = new VertexPositionColor(new Vector3(2f, 0f, 2f), Color.Yellow);
-            vertices[6] = new VertexPositionColor(new Vector3(0f, 2f, 2f), Color.Blue);
-            vertices[7] = new VertexPositionColor(new Vector3(2f, 2f, 2f), Color.Black);
+            vertices[4] = new VertexPositionTexture(new Vector3(-5f, -5f, -5f), new Vector2(1, 1));
+            vertices[5] = new VertexPositionTexture(new Vector3(5f, -5f, -5f), new Vector2(0, 1));
+            vertices[6] = new VertexPositionTexture(new Vector3(-5f, 5f, -5f), new Vector2(1, 0));
+            vertices[7] = new VertexPositionTexture(new Vector3(5f, 5f, -5f), new Vector2(0, 0));
 
-            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionColor), 8, BufferUsage.WriteOnly);
-            vertexBuffer.SetData<VertexPositionColor>(vertices);
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), 8, BufferUsage.WriteOnly);
+            vertexBuffer.SetData<VertexPositionTexture>(vertices);
 
             short[] indices = new short[36];
             indices[0] = 0; indices[1] = 1; indices[2] = 2;
@@ -111,6 +112,8 @@ namespace Assignment3
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
+            
+
 
             angle += 0.01f;
             view = Matrix.CreateLookAt(
@@ -132,7 +135,9 @@ namespace Assignment3
             basicEffect.World = world;
             basicEffect.View = view;
             basicEffect.Projection = projection;
-            basicEffect.VertexColorEnabled = true;
+            basicEffect.VertexColorEnabled = false;
+            basicEffect.TextureEnabled = true;
+            basicEffect.Texture = opm;
 
             GraphicsDevice.SetVertexBuffer(vertexBuffer);
             GraphicsDevice.Indices = indexBuffer;
