@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+ * Bradley Levine
+ * Assignemnt3
+ */
+
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,8 +117,26 @@ namespace Assignment3
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
-            
 
+            Matrix temp = Matrix.Identity;
+
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+                temp = Matrix.CreateTranslation(-1, 0, 0);
+            else if (Keyboard.GetState().IsKeyDown(Keys.A))
+                temp = Matrix.CreateTranslation(1, 0, 0);
+            else if (Keyboard.GetState().IsKeyDown(Keys.S))
+                temp = Matrix.CreateTranslation(0, 0, -1);
+            else if (Keyboard.GetState().IsKeyDown(Keys.D))
+                temp = Matrix.CreateTranslation(0, 0, 1);
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                temp *= Matrix.CreateFromYawPitchRoll(-1, 0, 0);
+            else if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                temp *= Matrix.CreateFromYawPitchRoll(1, 0, 0);
+            else if (Keyboard.GetState().IsKeyDown(Keys.Up))
+                temp *= Matrix.CreateFromYawPitchRoll(0, 0, -1);
+            else if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                temp *= Matrix.CreateFromYawPitchRoll(0, 0, 1);
 
             angle += 0.01f;
             view = Matrix.CreateLookAt(
